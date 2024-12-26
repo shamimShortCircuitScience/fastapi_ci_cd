@@ -41,7 +41,23 @@ jobs:
           host: 52.91.98.167
           username: ubuntu
           key: ${{ env.EC2_KEY }}
+        #   script: |
+        #     cd /home/ubuntu/
+        #     docker-compose -f docker-compose.yml down
+        #     docker-compose -f docker-compose.yml up -d
           script: |
-            cd /home/ubuntu/
+            # Create directory if it doesn't exist
+            mkdir -p /home/ubuntu/deployments
+            cd /home/ubuntu/deployments
+
+            # Download the artifact (replace with correct URL)
+            curl -L "https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts" \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" | jq -r '.artifacts[] | select(.name == "docker-compose-file") | .archive_download_url' | xargs curl -L -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -o docker-compose-file.zip
+            unzip docker-compose-file.zip
+            mv docker-compose.yml docker-compose.yml.temp
+            rm docker-compose-file.zip
+            mv docker-compose.yml.temp docker-compose.yml
+            # Deploy using docker-compose
             docker-compose -f docker-compose.yml down
             docker-compose -f docker-compose.yml up -d
