@@ -26,6 +26,10 @@ jobs:
           key: ${{ env.EC2_KEY }}
           remote_path: /home/ubuntu/
           local_path: docker-compose.yml
+          # Add a pre command to set the permissions
+          pre_command: "echo '${{ env.EC2_KEY }}' > id_rsa && chmod 600 id_rsa"
+          # And change the key to use the id_rsa file
+          key_path: id_rsa
 
       - name: Deploy Application on EC2
         uses: appleboy/ssh-action@master
