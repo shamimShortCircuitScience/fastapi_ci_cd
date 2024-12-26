@@ -1,33 +1,43 @@
-name: CD Pipeline 
-
+name: CD Pipeline
 
 on:
-    workflow_run:
-        workflows: ["CI Pipeline"]
-        types:
-            - completed
+  workflow_run:
+    workflows: ["CI Pipeline"]
+    types:
+      - completed
 
 jobs:
-    deploy:
-        runs-on: ubuntu-latest
-    
+  deploy:
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success'
     steps:
-        - name: Set up Deployment Variable 
-          env:
-            EC2_USER: ubuntu
-            EC2_HOST: 52.91.98.167
-            EC2_KEY: ${{ secrets.EC2_KEY }}
-        
-        # Step 2: Upload Files to EC2
-        - name: Upload Docker Compose to EC2
-          run: |
-           scp -o StrictHostKeyChecking=no -i $EC2_KEY docker-compose.yml $EC2_USER@$EC2_HOST:/home/ubuntu/
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    # Step 3: Deploy Application on EC2
-        - name: Deploy Application on EC2
-          run: |
-           ssh -o StrictHostKeyChecking=no -i $EC2_KEY $EC2_USER@$EC2_HOST "
-           docker-compose -f /home/ubuntu/docker-compose.yml down &&
-           docker-compose -f /home/ubuntu/docker-compose.yml up -d
-           "
-          
+      - name: Upload Docker Compose to EC2
+        uses: appleboy/scp-action@master
+        env:
+          EC2_USER: ubuntu
+          EC2_HOST: 52.91.98.167
+          EC2_KEY: ${{ env.EC2_KEY }}
+        with:
+          host: 52.91.98.167
+          username: ubuntu
+          key: ${{ env.EC2_KEY }}
+          remote_path: /home/ubuntu/
+          local_path: docker-compose.yml
+
+      - name: Deploy Application on EC2
+        uses: appleboy/ssh-action@master
+        env:
+          EC2_USER: ubuntu
+          EC2_HOST: 52.91.98.167
+          EC2_KEY: ${{ env.EC2_KEY }}
+        with:
+          host: 52.91.98.167
+          username: ubuntu
+          key: ${{ env.EC2_KEY }}
+          script: |
+            cd /home/ubuntu/
+            docker-compose -f docker-compose.yml down
+            docker-compose -f docker-compose.yml up -d
