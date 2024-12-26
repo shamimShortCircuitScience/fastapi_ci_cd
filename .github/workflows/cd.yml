@@ -16,27 +16,26 @@ jobs:
 
       - name: Upload Docker Compose to EC2
         uses: appleboy/ssh-action@master
-        env:
-          EC2_USER: ubuntu
-          EC2_HOST: 52.91.98.167
-          EC2_KEY: ${{ env.EC2_KEY }}
         with:
-          debug: true
           host: 52.91.98.167
           username: ubuntu
-          key: ${{ env.EC2_KEY }}
+          key: ${{ secrets.EC2_KEY }}
+          port: 22
+          script: |
+            mkdir -p /home/ubuntu/
+            echo "Uploading Docker Compose file"
+            docker-compose -f docker-compose.yml down
+            docker-compose -f docker-compose.yml up -d
 
       - name: Deploy Application on EC2
         uses: appleboy/ssh-action@master
-        env:
-          EC2_USER: ubuntu
-          EC2_HOST: 52.91.98.167
-          EC2_KEY: ${{ env.EC2_KEY }}
         with:
           host: 52.91.98.167
           username: ubuntu
-          key: ${{ env.EC2_KEY }}
+          key: ${{ secrets.EC2_KEY }}
+          port: 22
           script: |
+            echo "Deploying Application"
             cd /home/ubuntu/
             docker-compose -f docker-compose.yml down
             docker-compose -f docker-compose.yml up -d
