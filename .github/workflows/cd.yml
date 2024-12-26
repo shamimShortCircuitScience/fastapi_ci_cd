@@ -23,7 +23,7 @@ jobs:
           echo "Current directory: $(pwd)"
           ls -al  # List the files to ensure docker-compose.yml exists
 
-      # Step 3: Remove any existing docker-compose.yml file on the remote EC2
+      # Step 3: Remove any existing docker-compose.yml file or directory on the remote EC2
       - name: Remove Existing docker-compose.yml on EC2
         uses: appleboy/ssh-action@master
         with:
@@ -32,8 +32,16 @@ jobs:
           key: ${{ secrets.EC2_KEY }}  # GitHub secret for EC2 SSH private key
           port: 22
           script: |
-            echo "Removing any existing docker-compose.yml file..."
-            rm -f /home/ubuntu/docker-compose.yml  # Remove the existing file if it exists
+            echo "Checking if docker-compose.yml is a file or directory..."
+            if [ -f /home/ubuntu/docker-compose.yml ]; then
+              echo "Removing file /home/ubuntu/docker-compose.yml"
+              rm /home/ubuntu/docker-compose.yml
+            elif [ -d /home/ubuntu/docker-compose.yml ]; then
+              echo "Removing directory /home/ubuntu/docker-compose.yml"
+              rm -rf /home/ubuntu/docker-compose.yml
+            else
+              echo "No existing docker-compose.yml file or directory found."
+            fi
 
       # Step 4: Upload docker-compose.yml to EC2
       - name: Upload Docker Compose to EC2
