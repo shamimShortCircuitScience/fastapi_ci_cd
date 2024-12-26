@@ -25,12 +25,6 @@ jobs:
           host: 52.91.98.167
           username: ubuntu
           key: ${{ env.EC2_KEY }}
-          remote_path: /home/ubuntu/
-          local_path: docker-compose.yml
-          # Add a pre command to set the permissions
-          pre_command: "echo '${{ env.EC2_KEY }}' > id_rsa && chmod 600 id_rsa"
-        #   # And change the key to use the id_rsa file
-        #   key_path: id_rsa
 
       - name: Deploy Application on EC2
         uses: appleboy/ssh-action@master
@@ -46,28 +40,3 @@ jobs:
             cd /home/ubuntu/
             docker-compose -f docker-compose.yml down
             docker-compose -f docker-compose.yml up -d
-        #   script: |
-        #     # Create a deployment directory if it doesn't exist
-        #     mkdir -p /home/ubuntu/deployments
-        #     cd /home/ubuntu/deployments
-
-        #     # Construct the artifact download URL
-        #     ARTIFACT_URL=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-        #       "https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts" | \
-        #       jq -r '.artifacts[] | select(.name == "docker-compose-file") | .archive_download_url')
-
-        #     # Download the artifact
-        #     if [[ -n "$ARTIFACT_URL" ]]; then
-        #       curl -L -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "$ARTIFACT_URL" -o docker-compose-file.zip
-        #       unzip docker-compose-file.zip
-        #       rm docker-compose-file.zip
-        #       mv docker-compose.yml docker-compose.yml.temp
-        #       rm docker-compose.yml
-        #       mv docker-compose.yml.temp docker-compose.yml
-
-        #       # Deploy using docker-compose
-        #       docker-compose -f docker-compose.yml down || true # Ignore errors if down fails
-        #       docker-compose -f docker-compose.yml up -d
-        #     else
-        #       echo "Artifact 'docker-compose-file' not found. Skipping deployment."
-        #     fi
