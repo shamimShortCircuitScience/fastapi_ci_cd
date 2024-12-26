@@ -26,7 +26,10 @@ jobs:
             echo "Uploading Docker Compose file"
             docker-compose -f docker-compose.yml down
             docker-compose -f docker-compose.yml up -d
-
+      - name: Debug File Locations
+        run: |
+            echo "Current directory: $(pwd)"
+            ls -al
       - name: Deploy Application on EC2
         uses: appleboy/ssh-action@master
         with:
