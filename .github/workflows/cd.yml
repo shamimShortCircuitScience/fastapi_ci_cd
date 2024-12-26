@@ -36,7 +36,19 @@ jobs:
           source: ./docker-compose.yml  # Path to docker-compose.yml on the self-hosted runner
           target: /home/ubuntu/  # Target path on your EC2 instance
 
-      # Step 4: Debug files on EC2 to ensure docker-compose.yml is correctly uploaded
+      # Step 4: Remove any existing docker-compose.yml file before deploying
+      - name: Remove Existing docker-compose.yml on EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: 52.91.98.167
+          username: ubuntu
+          key: ${{ secrets.EC2_KEY }}
+          port: 22
+          script: |
+            echo "Removing any existing docker-compose.yml file..."
+            rm -f /home/ubuntu/docker-compose.yml  # Remove the existing file if it exists
+
+      # Step 5: Check Files on EC2 to verify upload
       - name: Check Files on EC2
         uses: appleboy/ssh-action@master
         with:
@@ -48,7 +60,7 @@ jobs:
             echo "Checking files on EC2:"
             ls -al /home/ubuntu/  # List the files in the target directory to verify upload
 
-      # Step 5: Deploy Application on EC2 using Docker Compose
+      # Step 6: Deploy Application on EC2 using Docker Compose
       - name: Deploy Application on EC2
         uses: appleboy/ssh-action@master
         with:
@@ -61,4 +73,3 @@ jobs:
             cd /home/ubuntu/
             docker-compose down  # Bring down any existing containers
             docker-compose up -d  # Bring up the containers in detached mode
-
