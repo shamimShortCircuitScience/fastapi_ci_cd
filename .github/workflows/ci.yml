@@ -19,7 +19,7 @@ jobs:
               uses: docker/setup-buildx-action@v2
 
             - name: Build Docker Image 
-              run: docker build -t fastapi_ci_cd_app
+              run: docker build -t fastapi_ci_cd_app .
             
             # - name: Run Unit Tests
             #   run: pytest tests/
