@@ -11,6 +11,10 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event.workflow_run.conclusion == 'success'
     steps:
+      - name: Debug File Locations
+        run: |
+            echo "Current directory: $(pwd)"
+            ls -al
       - name: Checkout code
         uses: actions/checkout@v3
 
@@ -26,10 +30,6 @@ jobs:
             echo "Uploading Docker Compose file"
             docker-compose -f docker-compose.yml down
             docker-compose -f docker-compose.yml up -d
-      - name: Debug File Locations
-        run: |
-            echo "Current directory: $(pwd)"
-            ls -al
       - name: Deploy Application on EC2
         uses: appleboy/ssh-action@master
         with:
