@@ -76,6 +76,6 @@ jobs:
           port: 22
           script: |
             echo "Starting Docker Compose on EC2..."
-            cd /home/ubuntu/
+            cd /home/ubuntu/actions-runner-backend/_work/fastapi_ci_cd/fastapi_ci_cd
             docker-compose down  # Bring down any existing containers
             docker-compose up -d  # Bring up containers in detached mode
